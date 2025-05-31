@@ -7,6 +7,6 @@ namespace HomeProject.Database
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> dbContext) : base(dbContext) { }
 
-        public DbSet<Profile> Profiles { get; set; }
+        public DbSet<ProfileModel> Profiles { get; set; }
     }
 }
