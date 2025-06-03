@@ -1,4 +1,5 @@
-﻿using HomeProject.Models.Request.MediaContent;
+﻿using AutoMapper;
+using HomeProject.Models.Request.MediaContent;
 using HomeProject.Services.MediaContentService;
 using Microsoft.AspNetCore.Mvc;
 
@@ -28,5 +29,40 @@ namespace HomeProject.Controllers
             return Ok(response);
         }
 
+        [HttpGet("contents")]
+        public async Task<IActionResult> GetContents()
+        {
+            var response = await _mediaContentService.GetContents();
+
+            if (!response.Status)
+            {
+                return BadRequest(response);
+            }
+            return Ok(response);
+        }
+
+        [HttpGet("contents/{profileId}")]
+        public async Task<IActionResult> GetContentsByProfileId(int profileId)
+        {
+            var response = await _mediaContentService.GetContentsByProfileId(profileId);
+
+            if (!response.Status)
+            {
+                return BadRequest(response);
+            }
+            return Ok(response);
+        }
+
+        [HttpGet("full/content/{id}")]
+        public async Task<IActionResult> GetFull(int id)
+        {
+            var response = await _mediaContentService.GetFullContentsById(id);
+
+            if (!response.Status)
+            {
+                return BadRequest(response);
+            }
+            return File(response.Data!.FullData!, response.Data.ContentType);
+        }
     }
 }

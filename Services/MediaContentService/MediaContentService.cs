@@ -4,6 +4,8 @@ using HomeProject.Constants;
 using HomeProject.Models.Domain;
 using HomeProject.Repositories.MediaContentRepository;
 using FFMpegCore;
+using HomeProject.Models.Response.MediaContent;
+using Microsoft.EntityFrameworkCore;
 
 namespace HomeProject.Services.MediaContentService
 {
@@ -14,6 +16,110 @@ namespace HomeProject.Services.MediaContentService
         public MediaContentService(IMediaContentRepository mediaContentRepository)
         {
             _mediaContentRepository = mediaContentRepository;
+        }
+
+        public async Task<ResponseModel<List<ContentPreviewListDto>>> GetContents()
+        {
+            try
+            {
+                var query = _mediaContentRepository.GetAllQueryable(x => x.IsActive, y => y.Profile!);
+                var mediaContents = await query.Select(x => new ContentPreviewListDto
+                {
+                    Id = x.Id,
+                    ProfileId = x.ProfileId,
+                    ProfileName = x.Profile!.Name,
+                    FileName = x.FileName,
+                    ContentType = /*x.ContentType*/"video/mp4",
+                    PreviewData = x.PreviewData
+                }).ToListAsync();
+
+                return new ResponseModel<List<ContentPreviewListDto>>
+                {
+                    Status = true,
+                    Message = StringResources.Success,
+                    Data = mediaContents
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ResponseModel<List<ContentPreviewListDto>>
+                {
+                    Status = false,
+                    Message = ex.Message
+                };
+            }
+        }
+
+        public async Task<ResponseModel<List<ContentPreviewListDto>>> GetContentsByProfileId(int profileId)
+        {
+            try
+            {
+                var query = _mediaContentRepository.GetAllQueryable(x => x.ProfileId == profileId, y => y.Profile!);
+                var mediaContents = await query.Select(x => new ContentPreviewListDto
+                {
+                    Id = x.Id,
+                    ProfileId = x.ProfileId,
+                    ProfileName = x.Profile!.Name,
+                    FileName = x.FileName,
+                    ContentType = /*x.ContentType*/"video/mp4",
+                    PreviewData = x.PreviewData
+                }).ToListAsync();
+
+                return new ResponseModel<List<ContentPreviewListDto>>
+                {
+                    Status = true,
+                    Message = StringResources.Success,
+                    Data = mediaContents
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ResponseModel<List<ContentPreviewListDto>>
+                {
+                    Status = false,
+                    Message = ex.Message
+                };
+            }
+        }
+
+        public async Task<ResponseModel<ContentDetailsDto>> GetFullContentsById(int id)
+        {
+            try
+            {
+                var query = _mediaContentRepository.GetAllQueryable(x => x.Id == id, y => y.Profile!);
+                var mediaContents = await query.Select(x => new ContentDetailsDto
+                {
+                    Id = x.Id,
+                    ProfileId = x.ProfileId,
+                    ProfileName = x.Profile!.Name,
+                    ContentType = x.ContentType,
+                    FullData = x.FullData
+                }).FirstAsync();
+
+                if (mediaContents == null)
+                {
+                    return new ResponseModel<ContentDetailsDto>
+                    {
+                        Status = false,
+                        Message = StringResources.NotFound
+                    };
+                }
+
+                return new ResponseModel<ContentDetailsDto>
+                {
+                    Status = true,
+                    Message = StringResources.Success,
+                    Data = mediaContents
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ResponseModel<ContentDetailsDto>
+                {
+                    Status = false,
+                    Message = ex.Message
+                };
+            }
         }
 
         public async Task<ResponseModel<object>> UploadWithPreview(MediaContentInDto request)

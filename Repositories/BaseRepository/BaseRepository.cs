@@ -1,5 +1,6 @@
 ﻿using HomeProject.Database;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
 using System.Linq.Expressions;
 
 namespace HomeProject.Repositories.BaseRepository;
@@ -362,6 +363,25 @@ public class BaseRepository<T> : IBaseRepository<T> where T : class
         }
 
         return await query.ToListAsync();
+    }
+
+    public IQueryable<T> GetAllQueryable(
+        Expression<Func<T, bool>>? filters = null,
+        params Expression<Func<T, object>>[] includeProperties)
+    {
+        IQueryable<T> query = _dbContext.Set<T>();
+
+        if (filters != null)
+        {
+            query = query.Where(filters);
+        }
+
+        if (includeProperties != null)
+        {
+            query = includeProperties.Aggregate(query, (current, includeProperty) => current.Include(includeProperty));
+        }
+
+        return query.AsQueryable();
     }
 
     public async Task<int> CompleteAsync()

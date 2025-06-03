@@ -5,6 +5,7 @@ using HomeProject.Repositories.ProfileRepository;
 using HomeProject.Services.CommonService;
 using HomeProject.Services.MediaContentService;
 using HomeProject.Services.ProfileService;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -24,6 +25,10 @@ namespace HomeProject.ServiceExtensions
             }).AddJsonOptions(options =>
             {
                 options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+            });
+            services.Configure<FormOptions>(options =>
+            {
+                options.MultipartBodyLengthLimit = 1L * 1024 * 1024 * 1024; // 1 GB
             });
             services.AddAutoMapper(typeof(AutoMapperProfiles));
             services.AddEndpointsApiExplorer();

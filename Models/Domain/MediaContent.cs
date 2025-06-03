@@ -10,5 +10,8 @@ namespace HomeProject.Models.Domain
         public required string ContentType { get; set; }
         public byte[]? PreviewData { get; set; }
         public byte[]? FullData { get; set; }
+
+        [ForeignKey(nameof(ProfileId))]
+        public ProfileModel? Profile { get; set; }
     }
 }

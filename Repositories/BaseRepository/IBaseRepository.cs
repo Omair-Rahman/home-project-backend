@@ -43,5 +43,8 @@ public interface IBaseRepository<TEntity> where TEntity : class
         Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>>? orderBy = null,
         int? skip = default, int? take = default,
         params Expression<Func<TEntity, object>>[] includeProperties);
+    IQueryable<TEntity> GetAllQueryable(
+        Expression<Func<TEntity, bool>>? filters = null,
+        params Expression<Func<TEntity, object>>[] includeProperties);
     Task<int> CompleteAsync();
 }
