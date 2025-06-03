@@ -8,5 +8,6 @@ namespace HomeProject.Database
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> dbContext) : base(dbContext) { }
 
         public DbSet<ProfileModel> Profiles { get; set; }
+        public DbSet<MediaContent> MediaContents { get; set; }
     }
 }

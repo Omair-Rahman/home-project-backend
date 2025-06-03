@@ -9,6 +9,7 @@
         public const string DeleteSuccess = "Delete successfully.";
         public const string DeleteFails = "Delete failed.";
         public const string NotFound = "Not found.";
+        public const string NoFileFound = "No file uploaded.";
         public const string BadRequest = "Bad request.";
         public const string InternalServerError = "Internal server error.";
         public const string Unauthorized = "Unauthorized access.";

@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
-namespace Foodi.UserServiceProject.Repositories.BaseRepository;
+namespace HomeProject.Repositories.BaseRepository;
 
 public class BaseRepository<T> : IBaseRepository<T> where T : class
 {

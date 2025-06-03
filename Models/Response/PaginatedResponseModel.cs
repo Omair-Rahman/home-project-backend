@@ -1,4 +1,4 @@
-﻿namespace Foodi.UserServiceProject.Models.ResponseModels;
+﻿namespace HomeProject.Models.Response;
 
 public class PaginatedResponseModel<T> where T : class
 {

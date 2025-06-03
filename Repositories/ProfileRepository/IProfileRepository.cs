@@ -1,4 +1,4 @@
-﻿using Foodi.UserServiceProject.Repositories.BaseRepository;
+﻿using HomeProject.Repositories.BaseRepository;
 using HomeProject.Models.Domain;
 
 namespace HomeProject.Repositories.ProfileRepository

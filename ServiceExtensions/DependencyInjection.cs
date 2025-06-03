@@ -1,6 +1,9 @@
 ﻿using System.Text.Json;
 using HomeProject.Database;
+using HomeProject.Repositories.MediaContentRepository;
 using HomeProject.Repositories.ProfileRepository;
+using HomeProject.Services.CommonService;
+using HomeProject.Services.MediaContentService;
 using HomeProject.Services.ProfileService;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -38,9 +41,12 @@ namespace HomeProject.ServiceExtensions
 
             // Register services
             services.AddTransient<IProfileService, ProfileService>();
+            services.AddTransient<IMediaContentService, MediaContentService>();
+            services.AddTransient<ICommonService, CommonService>();
 
             // Register repositories
             services.AddScoped<IProfileRepository, ProfileRepository>();
+            services.AddScoped<IMediaContentRepository, MediaContentRepository>();
 
             return services;
         }

@@ -1,4 +1,4 @@
-﻿using Foodi.UserServiceProject.Models.ResponseModels;
+﻿using HomeProject.Models.Response;
 using HomeProject.Models.Domain;
 using HomeProject.Models.Request.Profile;
 

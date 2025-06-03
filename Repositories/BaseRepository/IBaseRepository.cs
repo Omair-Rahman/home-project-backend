@@ -1,6 +1,6 @@
 ﻿using System.Linq.Expressions;
 
-namespace Foodi.UserServiceProject.Repositories.BaseRepository;
+namespace HomeProject.Repositories.BaseRepository;
 
 public interface IBaseRepository<TEntity> where TEntity : class
 {

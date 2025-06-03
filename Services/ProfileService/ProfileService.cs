@@ -1,5 +1,5 @@
 ﻿using System.Linq.Expressions;
-using Foodi.UserServiceProject.Models.ResponseModels;
+using HomeProject.Models.Response;
 using HomeProject.Constants;
 using HomeProject.Models.Domain;
 using HomeProject.Models.Request.Profile;
@@ -56,7 +56,11 @@ namespace HomeProject.Services.ProfileService
             }
             catch (Exception ex)
             {
-                throw new Exception(StringResources.InternalServerError, ex);
+                return new ResponseModel<object>
+                {
+                    Status = false,
+                    Message = ex.Message
+                };
             }
         }
 
@@ -102,7 +106,11 @@ namespace HomeProject.Services.ProfileService
             }
             catch (Exception ex)
             {
-                throw new Exception(StringResources.InternalServerError, ex);
+                return new ResponseModel<object>
+                {
+                    Status = false,
+                    Message = ex.Message
+                };
             }
         }
 
@@ -135,7 +143,11 @@ namespace HomeProject.Services.ProfileService
             }
             catch (Exception ex)
             {
-                throw new Exception(StringResources.InternalServerError, ex);
+                return new ResponseModel<object>
+                {
+                    Status = false,
+                    Message = ex.Message
+                };
             }
         }
 
@@ -163,7 +175,11 @@ namespace HomeProject.Services.ProfileService
             }
             catch (Exception ex)
             {
-                throw new Exception(StringResources.InternalServerError, ex);
+                return new ResponseModel<ProfileModel?>
+                {
+                    Status = false,
+                    Message = ex.Message
+                };
             }
         }
 
