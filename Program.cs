@@ -1,7 +1,4 @@
-using HomeProject.Database;
 using HomeProject.ServiceExtensions;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 ConfigurationManager configuration = builder.Configuration;

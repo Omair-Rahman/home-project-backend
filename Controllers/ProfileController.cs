@@ -51,15 +51,27 @@ namespace HomeProject.Controllers
         }
 
         [HttpPut("{id}")]
-        public Task<IActionResult> Put(int id, [FromForm] ProfileInDto request)
+        public async Task<IActionResult> Put(int id, [FromForm] ProfileUpdateDto request)
         {
-            throw new NotImplementedException();
+            var response = await _profileService.Update(id, request);
+
+            if (!response.Status)
+            {
+                return BadRequest(response);
+            }
+            return Ok(response);
         }
 
         [HttpDelete("{id}")]
-        public Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
-            throw new NotImplementedException();
+            var response = await _profileService.Delete(id);
+
+            if (!response.Status)
+            {
+                return BadRequest(response);
+            }
+            return Ok(response);
         }
     }
 }

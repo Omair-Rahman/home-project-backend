@@ -1,10 +1,8 @@
 ﻿using System.Linq.Expressions;
-using AutoMapper;
 using Foodi.UserServiceProject.Models.ResponseModels;
 using HomeProject.Constants;
 using HomeProject.Models.Domain;
 using HomeProject.Models.Request.Profile;
-using HomeProject.Models.Response.Profile;
 using HomeProject.Repositories.ProfileRepository;
 
 namespace HomeProject.Services.ProfileService
@@ -12,11 +10,9 @@ namespace HomeProject.Services.ProfileService
     public class ProfileService : IProfileService
     {
         private readonly IProfileRepository _profileRepository;
-        private readonly IMapper _mapper;
-        public ProfileService(IProfileRepository profileRepository, IMapper mapper)
+        public ProfileService(IProfileRepository profileRepository)
         {
             _profileRepository = profileRepository;
-            _mapper = mapper;
         }
 
         public async Task<ResponseModel<object>> Create(ProfileInDto request)
@@ -45,6 +41,7 @@ namespace HomeProject.Services.ProfileService
                 await _profileRepository.AddAsync(new ProfileModel
                 {
                     Name = request.Name,
+                    Rating = request.Rating,
                     ProfileUrl = request.ProfileUrl,
                     Image = request.Image?.FileName,
                     ImageFile = imageBytes.Length > 1 ? imageBytes : null
@@ -63,39 +60,78 @@ namespace HomeProject.Services.ProfileService
             }
         }
 
-        public Task<ResponseModel<object>> Delete(int id)
-        {
-            throw new NotImplementedException();
-        }
-
-        public async Task<PaginatedResponseModel<ProfileModel>> Get(ProfileFilter request)
+        public async Task<ResponseModel<object>> Update(int id, ProfileUpdateDto request)
         {
             try
             {
-                var paginatedResponseModel = new PaginatedResponseModel<ProfileModel>();
-
-                var filters = new List<Expression<Func<ProfileModel, bool>>>();
-
-                filters.Add(x => x.IsActive == request.IsActive);
-
-                if (request.Name != null)
+                var profile = await _profileRepository.GetAsync(id);
+                
+                if (profile == null)
                 {
-                    filters.Add(x => x.Name.ToLower().Contains(request.Name.ToLower()));
-                }
-                if (request.Rating != null)
-                {
-                    filters.Add(x => x.Rating >= request.Rating);
+                    return new ResponseModel<object>
+                    {
+                        Status = false,
+                        Message = StringResources.NotFound
+                    };
                 }
 
-                var findAll = await _profileRepository.GetAllAsync(filters, GetOrderBy(), (request.PageNumber - 1) * request.ItemsPerPage, request.ItemsPerPage);
-                paginatedResponseModel.Items = findAll.ToList();
-                paginatedResponseModel.TotalItems = await _profileRepository.CountAsync(filters);
-                paginatedResponseModel.TotalPages = (int)Math.Ceiling((double)paginatedResponseModel.TotalItems / request.ItemsPerPage);
+                var imageBytes = new byte[0];
 
-                paginatedResponseModel.PageNumber = request.PageNumber;
-                paginatedResponseModel.ItemsPerPage = request.ItemsPerPage;
+                if (request.IsNew && !(request.Image == null || request.Image.Length == 0))
+                {
+                    using var ms = new MemoryStream();
+                    await request.Image.CopyToAsync(ms);
+                    imageBytes = ms.ToArray();
+                }
 
-                return paginatedResponseModel;
+                profile.Name = request.Name;
+                profile.Rating = request.Rating;
+                profile.ProfileUrl = request.ProfileUrl;
+                profile.Image = imageBytes.Length > 1 ? request.Image?.FileName : profile.Image;
+                profile.ImageFile = imageBytes.Length > 1 ? imageBytes : profile.ImageFile;
+                profile.UpdatedAt = DateTime.UtcNow;
+
+                await _profileRepository.UpdateAsync(profile);
+                await _profileRepository.CompleteAsync();
+
+                return new ResponseModel<object>
+                {
+                    Status = true,
+                    Message = StringResources.UpdateSuccess
+                };
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(StringResources.InternalServerError, ex);
+            }
+        }
+
+        public async Task<ResponseModel<object>> Delete(int id)
+        {
+            try
+            {
+                var profile = await _profileRepository.GetAsync(id);
+
+                if (profile == null)
+                {
+                    return new ResponseModel<object>
+                    {
+                        Status = false,
+                        Message = StringResources.NotFound
+                    };
+                }
+
+                profile.IsActive = false;
+                profile.UpdatedAt = DateTime.UtcNow;
+
+                await _profileRepository.UpdateAsync(profile);
+                await _profileRepository.CompleteAsync();
+
+                return new ResponseModel<object>
+                {
+                    Status = true,
+                    Message = StringResources.UpdateSuccess
+                };
             }
             catch (Exception ex)
             {
@@ -131,9 +167,39 @@ namespace HomeProject.Services.ProfileService
             }
         }
 
-        public Task<ResponseModel<object>> Update(int id, ProfileInDto request)
+        public async Task<PaginatedResponseModel<ProfileModel>> Get(ProfileFilter request)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var paginatedResponseModel = new PaginatedResponseModel<ProfileModel>();
+
+                    var filters = new List<Expression<Func<ProfileModel, bool>>>();
+
+                filters.Add(x => x.IsActive == request.IsActive);
+
+                if (request.Name != null)
+                {
+                    filters.Add(x => x.Name.ToLower().Contains(request.Name.ToLower()));
+                }
+                if (request.Rating != null)
+                {
+                    filters.Add(x => x.Rating >= request.Rating);
+                }
+
+                var findAll = await _profileRepository.GetAllAsync(filters, GetOrderBy(), (request.PageNumber - 1) * request.ItemsPerPage, request.ItemsPerPage);
+                paginatedResponseModel.Items = findAll.ToList();
+                paginatedResponseModel.TotalItems = await _profileRepository.CountAsync(filters);
+                paginatedResponseModel.TotalPages = (int)Math.Ceiling((double)paginatedResponseModel.TotalItems / request.ItemsPerPage);
+
+                paginatedResponseModel.PageNumber = request.PageNumber;
+                paginatedResponseModel.ItemsPerPage = request.ItemsPerPage;
+
+                return paginatedResponseModel;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(StringResources.InternalServerError, ex);
+            }
         }
 
         private static Func<IQueryable<ProfileModel>, IOrderedQueryable<ProfileModel>> GetOrderBy()
