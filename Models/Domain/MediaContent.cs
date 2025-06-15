@@ -8,6 +8,8 @@ namespace HomeProject.Models.Domain
         public int ProfileId { get; set; }
         public required string FileName { get; set; }
         public required string ContentType { get; set; }
+        public string? PreviewPath { get; set; }
+        public string? FullPath { get; set; }
         public byte[]? PreviewData { get; set; }
         public byte[]? FullData { get; set; }
 

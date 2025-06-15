@@ -19,7 +19,7 @@ namespace HomeProject.Controllers
         [RequestSizeLimit(1_500_000_000)] // Support up to ~1.5GB
         public async Task<IActionResult> UploadWithPreview(MediaContentInDto request)
         {
-            var response = await _mediaContentService.UploadWithPreview(request);
+            var response = await _mediaContentService.UploadWithPreviewV2(request);
 
             if (!response.Status)
             {

@@ -160,7 +160,7 @@ namespace HomeProject.Services.MediaContentService
                 var previewPath = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName() + ".mp4");
 
                 // Extract 10-second preview
-                var result = await FFMpegArguments
+                await FFMpegArguments
                     .FromFileInput(fullPath, true, options => options.Seek(TimeSpan.FromSeconds(startSeconds)))
                     .OutputToFile(previewPath, true, options => options
                         .WithDuration(TimeSpan.FromSeconds(10))
@@ -192,6 +192,99 @@ namespace HomeProject.Services.MediaContentService
                     ContentType = request.MediaFile.ContentType,
                     PreviewData = previewData,
                     FullData = fullData
+                };
+
+                await _mediaContentRepository.AddAsync(media);
+                await _mediaContentRepository.CompleteAsync();
+
+                return new ResponseModel<object>
+                {
+                    Status = true,
+                    Message = StringResources.CreateSuccess
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ResponseModel<object>
+                {
+                    Status = false,
+                    Message = ex.Message
+                };
+            }
+        }
+
+        public async Task<ResponseModel<object>> UploadWithPreviewV2(MediaContentInDto request)
+        {
+            try
+            {
+                if (request.MediaFile == null || request.MediaFile.Length == 0)
+                {
+                    return new ResponseModel<object>
+                    {
+                        Status = false,
+                        Message = StringResources.NoFileFound
+                    };
+                }
+
+                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+                Directory.CreateDirectory(uploadsFolder); // Ensure the folder exists
+
+                var uniqueFileName = $"{Guid.NewGuid()}_{request.ProfileId}.mp4";
+                var fullPath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                // Save original file to disk
+                using (var fs = new FileStream(fullPath, FileMode.Create))
+                {
+                    await request.MediaFile.CopyToAsync(fs);
+                }
+
+                var mediaInfo = await FFProbe.AnalyseAsync(fullPath);
+                var durationSeconds = mediaInfo.Duration.TotalSeconds;
+
+                if (durationSeconds < 10)
+                {
+                    System.IO.File.Delete(fullPath); // Clean up original if not valid
+                    return new ResponseModel<object>
+                    {
+                        Status = false,
+                        Message = "Video must be at least 10 seconds long."
+                    };
+                }
+
+                var random = new Random();
+                var startSeconds = random.Next(0, (int)(durationSeconds - 10));
+
+                var previewFileName = $"{Guid.NewGuid()}_preview_{request.ProfileId}.mp4";
+                var previewPath = Path.Combine(uploadsFolder, previewFileName);
+
+                // Extract 10-second preview
+                await FFMpegArguments
+                    .FromFileInput(fullPath, true, options => options.Seek(TimeSpan.FromSeconds(startSeconds)))
+                    .OutputToFile(previewPath, true, options => options
+                        .WithDuration(TimeSpan.FromSeconds(10))
+                        .WithFastStart()
+                        .WithVideoCodec("libx264")
+                        .WithAudioCodec("aac"))
+                    .ProcessAsynchronously();
+
+                if (!System.IO.File.Exists(previewPath))
+                {
+                    System.IO.File.Delete(fullPath);
+                    return new ResponseModel<object>
+                    {
+                        Status = false,
+                        Message = "Failed to create preview."
+                    };
+                }
+
+                // Save to DB
+                var media = new MediaContent
+                {
+                    ProfileId = request.ProfileId,
+                    FileName = request.MediaFile.FileName,
+                    ContentType = request.MediaFile.ContentType,
+                    FullPath = $"/uploads/{uniqueFileName}",
+                    PreviewPath = $"/uploads/{previewFileName}"
                 };
 
                 await _mediaContentRepository.AddAsync(media);
