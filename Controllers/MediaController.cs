@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using HomeProject.Models.Request.MediaContent;
+﻿using HomeProject.Models.Request.MediaContent;
 using HomeProject.Services.MediaContentService;
 using Microsoft.AspNetCore.Mvc;
 

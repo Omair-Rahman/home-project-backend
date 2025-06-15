@@ -1,16 +1,13 @@
 ﻿using HomeProject.Models.Response;
 using Microsoft.AspNetCore.Mvc.Filters;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HomeProject.ServiceExtensions
 {
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
     public class ValidationFilterAttribute : ActionFilterAttribute
     {
-        public ValidationFilterAttribute()
-        {
-
-        }
+        public ValidationFilterAttribute() { }
 
         public override async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
         {
@@ -29,7 +26,17 @@ namespace HomeProject.ServiceExtensions
                         }
                     }
                 }
+
+                // Optionally short-circuit the request
+                context.Result = new BadRequestObjectResult(new ResponseModel<object>
+                {
+                    Data = errors,
+                    Message = "One or more model validation error found.",
+                    Status = false
+                });
+                return;
             }
+
             await next();
         }
 
@@ -43,8 +50,6 @@ namespace HomeProject.ServiceExtensions
             if (!context.ModelState.IsValid)
             {
                 var errors = new Dictionary<string, string>();
-
-                IEnumerable<ModelError> allErrors = context.ModelState.Values.SelectMany(v => v.Errors);
 
                 foreach (var modelStateKey in context.ModelState.Keys)
                 {
