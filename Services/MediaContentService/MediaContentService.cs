@@ -277,6 +277,9 @@ namespace HomeProject.Services.MediaContentService
                     };
                 }
 
+                var previewData = await System.IO.File.ReadAllBytesAsync(previewPath);
+                System.IO.File.Delete(previewPath);
+
                 // Save to DB
                 var media = new MediaContent
                 {
@@ -284,7 +287,8 @@ namespace HomeProject.Services.MediaContentService
                     FileName = request.MediaFile.FileName,
                     ContentType = request.MediaFile.ContentType,
                     FullPath = $"/uploads/{uniqueFileName}",
-                    PreviewPath = $"/uploads/{previewFileName}"
+                    PreviewPath = $"/uploads/{previewFileName}",
+                    PreviewData = previewData
                 };
 
                 await _mediaContentRepository.AddAsync(media);
