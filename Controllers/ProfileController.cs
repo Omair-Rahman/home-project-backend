@@ -38,6 +38,18 @@ namespace HomeProject.Controllers
             return Ok(response);
         }
 
+        [HttpGet("{id}/details")]
+        public async Task<IActionResult> GetDetailsById(int id)
+        {
+            var response = await _profileService.GetDetailsById(id);
+
+            if (!response.Status)
+            {
+                return BadRequest(response);
+            }
+            return Ok(response);
+        }
+
         [HttpPost]
         public async Task<IActionResult> Post([FromForm] ProfileInDto request)
         {

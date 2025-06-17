@@ -5,6 +5,7 @@ namespace HomeProject.Models.Domain
     [Table("MediaContents")]
     public class MediaContent : BaseEntity
     {
+        public int Rating { get; set; }
         public int ProfileId { get; set; }
         public required string FileName { get; set; }
         public required string ContentType { get; set; }
@@ -12,6 +13,7 @@ namespace HomeProject.Models.Domain
         public string? FullPath { get; set; }
         public byte[]? PreviewData { get; set; }
         public byte[]? FullData { get; set; }
+        public bool IsFavourite { get; set; } = false;
 
         [ForeignKey(nameof(ProfileId))]
         public ProfileModel? Profile { get; set; }

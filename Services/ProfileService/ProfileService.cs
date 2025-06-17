@@ -1,9 +1,10 @@
-﻿using System.Linq.Expressions;
-using HomeProject.Models.Response;
-using HomeProject.Constants;
+﻿using HomeProject.Constants;
 using HomeProject.Models.Domain;
 using HomeProject.Models.Request.Profile;
+using HomeProject.Models.Response;
+using HomeProject.Models.Response.Profile;
 using HomeProject.Repositories.ProfileRepository;
+using System.Linq.Expressions;
 
 namespace HomeProject.Services.ProfileService
 {
@@ -176,6 +177,38 @@ namespace HomeProject.Services.ProfileService
             catch (Exception ex)
             {
                 return new ResponseModel<ProfileModel?>
+                {
+                    Status = false,
+                    Message = ex.Message
+                };
+            }
+        }
+
+        public async Task<ResponseModel<ProfileDetailsResponse?>> GetDetailsById(int id)
+        {
+            try
+            {
+                var data = await _profileRepository.GetDetailsById(id);
+                
+                if (data == null)
+                {
+                    return new ResponseModel<ProfileDetailsResponse?>
+                    {
+                        Status = false,
+                        Message = StringResources.NotFound
+                    };
+                }
+
+                return new ResponseModel<ProfileDetailsResponse?>
+                {
+                    Status = true,
+                    Message = StringResources.Success,
+                    Data = data
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ResponseModel<ProfileDetailsResponse?>
                 {
                     Status = false,
                     Message = ex.Message

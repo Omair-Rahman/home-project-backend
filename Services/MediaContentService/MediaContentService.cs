@@ -6,16 +6,22 @@ using HomeProject.Repositories.MediaContentRepository;
 using FFMpegCore;
 using HomeProject.Models.Response.MediaContent;
 using Microsoft.EntityFrameworkCore;
+using HomeProject.Repositories.ProfileRepository;
 
 namespace HomeProject.Services.MediaContentService
 {
     public class MediaContentService : IMediaContentService
     {
         private readonly IMediaContentRepository _mediaContentRepository;
+        private readonly IProfileRepository _profileRepository;
 
-        public MediaContentService(IMediaContentRepository mediaContentRepository)
+        public MediaContentService(
+            IMediaContentRepository mediaContentRepository,
+            IProfileRepository profileRepository
+            )
         {
             _mediaContentRepository = mediaContentRepository;
+            _profileRepository = profileRepository;
         }
 
         public async Task<ResponseModel<List<ContentPreviewListDto>>> GetContents()
@@ -226,6 +232,17 @@ namespace HomeProject.Services.MediaContentService
                     };
                 }
 
+                var profile = await _profileRepository.GetAsync(request.ProfileId);
+
+                if (profile == null)
+                {
+                    return new ResponseModel<object>
+                    {
+                        Status = false,
+                        Message = StringResources.Forbidden
+                    };
+                }
+
                 var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
                 Directory.CreateDirectory(uploadsFolder); // Ensure the folder exists
 
@@ -291,7 +308,11 @@ namespace HomeProject.Services.MediaContentService
                     PreviewData = previewData
                 };
 
+                profile.TotalMediaContents += 1;
+                profile.UpdatedAt = DateTime.UtcNow;
+
                 await _mediaContentRepository.AddAsync(media);
+                await _profileRepository.UpdateAsync(profile);
                 await _mediaContentRepository.CompleteAsync();
 
                 return new ResponseModel<object>
