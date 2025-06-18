@@ -63,5 +63,17 @@ namespace HomeProject.Controllers
             }
             return File(response.Data!.FullData!, response.Data.ContentType);
         }
+
+        [HttpPut("{id}/{isFavourite}")]
+        public async Task<IActionResult> UpdateContentIsFavourite(int id, bool isFavourite)
+        {
+            var response = await _mediaContentService.UpdateContentIsFavourite(id, isFavourite);
+
+            if (!response.Status)
+            {
+                return BadRequest(response);
+            }
+            return Ok(response);
+        }
     }
 }

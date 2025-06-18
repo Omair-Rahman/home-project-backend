@@ -36,7 +36,8 @@ namespace HomeProject.Services.MediaContentService
                     ProfileName = x.Profile!.Name,
                     FileName = x.FileName,
                     ContentType = /*x.ContentType*/"video/mp4",
-                    PreviewData = x.PreviewData
+                    PreviewData = x.PreviewData,
+                    IsFavourite = x.IsFavourite
                 }).ToListAsync();
 
                 return new ResponseModel<List<ContentPreviewListDto>>
@@ -68,7 +69,8 @@ namespace HomeProject.Services.MediaContentService
                     ProfileName = x.Profile!.Name,
                     FileName = x.FileName,
                     ContentType = /*x.ContentType*/"video/mp4",
-                    PreviewData = x.PreviewData
+                    PreviewData = x.PreviewData,
+                    IsFavourite = x.IsFavourite
                 }).ToListAsync();
 
                 return new ResponseModel<List<ContentPreviewListDto>>
@@ -126,7 +128,7 @@ namespace HomeProject.Services.MediaContentService
                     Message = ex.Message
                 };
             }
-        }
+        }        
 
         public async Task<ResponseModel<object>> UploadWithPreview(MediaContentInDto request)
         {
@@ -319,6 +321,43 @@ namespace HomeProject.Services.MediaContentService
                 {
                     Status = true,
                     Message = StringResources.CreateSuccess
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ResponseModel<object>
+                {
+                    Status = false,
+                    Message = ex.Message
+                };
+            }
+        }
+
+        public async Task<ResponseModel<object>> UpdateContentIsFavourite(int id, bool isFavourite)
+        {
+            try
+            {
+                var content = await _mediaContentRepository.GetAsync(id);
+
+                if (content == null)
+                {
+                    return new ResponseModel<object>
+                    {
+                        Status = false,
+                        Message = StringResources.Forbidden
+                    };
+                }
+
+                content.IsFavourite = isFavourite;
+                content.UpdatedAt = DateTime.UtcNow;
+
+                await _mediaContentRepository.UpdateAsync(content);
+                await _mediaContentRepository.CompleteAsync();
+
+                return new ResponseModel<object>
+                {
+                    Status = true,
+                    Message = StringResources.UpdateSuccess
                 };
             }
             catch (Exception ex)

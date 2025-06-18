@@ -11,5 +11,6 @@ namespace HomeProject.Services.MediaContentService
         Task<ResponseModel<List<ContentPreviewListDto>>> GetContents();
         Task<ResponseModel<List<ContentPreviewListDto>>> GetContentsByProfileId(int profileId);
         Task<ResponseModel<ContentDetailsDto>> GetFullContentsById(int id);
+        Task<ResponseModel<object>> UpdateContentIsFavourite(int id, bool isFavourite);
     }
 }

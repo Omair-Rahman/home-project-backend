@@ -8,5 +8,6 @@
         public string FileName { get; set; } = string.Empty;
         public string ContentType { get; set; } = string.Empty; // e.g., "video", "audio", "image"
         public byte[]? PreviewData { get; set; }
+        public bool IsFavourite { get; set; }
     }
 }
