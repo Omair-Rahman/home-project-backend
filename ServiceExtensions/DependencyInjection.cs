@@ -28,7 +28,7 @@ namespace HomeProject.ServiceExtensions
             });
             services.Configure<FormOptions>(options =>
             {
-                options.MultipartBodyLengthLimit = 1L * 1024 * 1024 * 1024; // 1 GB
+                options.MultipartBodyLengthLimit = 2L * 1024 * 1024 * 1024; // 2 GB
             });
             services.AddAutoMapper(typeof(AutoMapperProfiles));
             services.AddEndpointsApiExplorer();

@@ -4,6 +4,7 @@ using HomeProject.Models.Request.Profile;
 using HomeProject.Models.Response;
 using HomeProject.Models.Response.Profile;
 using HomeProject.Repositories.ProfileRepository;
+using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
 namespace HomeProject.Services.ProfileService
@@ -256,6 +257,34 @@ namespace HomeProject.Services.ProfileService
             Func<IQueryable<ProfileModel>, IOrderedQueryable<ProfileModel>>? orderBy = null;
             orderBy = models => models.OrderByDescending(ss => ss.Rating);
             return orderBy;
+        }
+
+        public async Task<ResponseModel<List<OptionModel>>> Option()
+        {
+            try
+            {
+                var query = _profileRepository.GetAllQueryable(x => x.IsActive);
+                var options = await query.Select(x => new OptionModel
+                {
+                    Id = x.Id,
+                    Name = $"{x.Name} (Id:{x.Id})",
+                }).ToListAsync();
+
+                return new ResponseModel<List<OptionModel>>
+                {
+                    Status = true,
+                    Message = StringResources.Success,
+                    Data = options
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ResponseModel<List<OptionModel>>
+                {
+                    Status = false,
+                    Message = ex.Message
+                };
+            }
         }
     }
 }

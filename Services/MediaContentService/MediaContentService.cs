@@ -100,8 +100,10 @@ namespace HomeProject.Services.MediaContentService
                     Id = x.Id,
                     ProfileId = x.ProfileId,
                     ProfileName = x.Profile!.Name,
-                    ContentType = x.ContentType,
-                    FullData = x.FullData
+                    ContentType = /*x.ContentType*/"video/mp4",
+                    FullData = x.FullData,
+                    FullPath = x.FullPath,
+                    IsFavourite = x.IsFavourite
                 }).FirstAsync();
 
                 if (mediaContents == null)

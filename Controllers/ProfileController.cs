@@ -85,5 +85,16 @@ namespace HomeProject.Controllers
             }
             return Ok(response);
         }
+
+        [HttpGet("Option")]
+        public async Task<IActionResult> Option()
+        {
+            var response = await _profileService.Option();
+            if (!response.Status)
+            {
+                return BadRequest(response);
+            }
+            return Ok(response);
+        }
     }
 }

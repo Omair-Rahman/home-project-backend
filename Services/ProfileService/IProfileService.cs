@@ -13,5 +13,6 @@ namespace HomeProject.Services.ProfileService
         Task<ResponseModel<object>> Create(ProfileInDto request);
         Task<ResponseModel<object>> Update(int id, ProfileUpdateDto request);
         Task<ResponseModel<object>> Delete(int id);
+        Task<ResponseModel<List<OptionModel>>> Option();
     }
 }

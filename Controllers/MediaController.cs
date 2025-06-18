@@ -16,7 +16,7 @@ namespace HomeProject.Controllers
         }
 
         [HttpPost("upload")]
-        [RequestSizeLimit(1_500_000_000)] // Support up to ~1.5GB
+        [RequestSizeLimit(2_147_483_648)] // Support up to ~2GB
         public async Task<IActionResult> UploadWithPreview(MediaContentInDto request)
         {
             var response = await _mediaContentService.UploadWithPreviewV2(request);
@@ -61,7 +61,7 @@ namespace HomeProject.Controllers
             {
                 return BadRequest(response);
             }
-            return File(response.Data!.FullData!, response.Data.ContentType);
+            return Ok(response);
         }
 
         [HttpPut("{id}/{isFavourite}")]
