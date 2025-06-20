@@ -29,18 +29,58 @@ namespace HomeProject.Services.MediaContentService
             try
             {
                 var query = _mediaContentRepository
-                    .GetAllQueryable(x => x.IsActive
+                    .GetAllQueryable(x => x.ContentType == StringResources.VideoContentType
                         && (request.ProfileId == null || x.ProfileId == request.ProfileId)
                         && (request.IsFavourite == null || x.IsFavourite == request.IsFavourite)
                         && (request.Rating == null || x.Rating >= request.Rating), y => y.Profile!);
                 var mediaContents = await query.Select(x => new ContentPreviewListDto
                 {
                     Id = x.Id,
+                    Rating = x.Rating,
                     ProfileId = x.ProfileId,
                     ProfileName = x.Profile!.Name,
                     FileName = x.FileName,
-                    ContentType = /*x.ContentType*/"video/mp4",
+                    ContentType = "video/mp4",
                     PreviewData = x.PreviewData,
+                    IsFavourite = x.IsFavourite
+                }).ToListAsync();
+
+                return new ResponseModel<List<ContentPreviewListDto>>
+                {
+                    Status = true,
+                    Message = StringResources.Success,
+                    Data = mediaContents
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ResponseModel<List<ContentPreviewListDto>>
+                {
+                    Status = false,
+                    Message = ex.Message
+                };
+            }
+        }
+
+        public async Task<ResponseModel<List<ContentPreviewListDto>>> GetImageContents(MediaContentFilter request)
+        {
+            try
+            {
+                var query = _mediaContentRepository
+                    .GetAllQueryable(x => x.ContentType == StringResources.ImageContentType
+                        && (request.ProfileId == null || x.ProfileId == request.ProfileId)
+                        && (request.IsFavourite == null || x.IsFavourite == request.IsFavourite)
+                        && (request.Rating == null || x.Rating >= request.Rating), y => y.Profile!);
+                var mediaContents = await query.Select(x => new ContentPreviewListDto
+                {
+                    Id = x.Id,
+                    Rating = x.Rating,
+                    ProfileId = x.ProfileId,
+                    ProfileName = x.Profile!.Name,
+                    FileName = x.FileName,
+                    ContentType = "image/jpeg",
+                    PreviewData = x.PreviewData,
+                    FullData = x.FullData,
                     IsFavourite = x.IsFavourite
                 }).ToListAsync();
 
@@ -71,7 +111,7 @@ namespace HomeProject.Services.MediaContentService
                     Id = x.Id,
                     ProfileId = x.ProfileId,
                     ProfileName = x.Profile!.Name,
-                    ContentType = /*x.ContentType*/"video/mp4",
+                    ContentType = "video/mp4",
                     FullData = x.FullData,
                     FullPath = x.FullPath,
                     IsFavourite = x.IsFavourite
@@ -170,7 +210,7 @@ namespace HomeProject.Services.MediaContentService
                 {
                     ProfileId = request.ProfileId,
                     FileName = request.MediaFile.FileName,
-                    ContentType = request.MediaFile.ContentType,
+                    ContentType = StringResources.VideoContentType,
                     PreviewData = previewData,
                     FullData = fullData
                 };
@@ -277,10 +317,70 @@ namespace HomeProject.Services.MediaContentService
                 {
                     ProfileId = request.ProfileId,
                     FileName = request.MediaFile.FileName,
-                    ContentType = request.MediaFile.ContentType,
+                    ContentType = StringResources.VideoContentType,
                     FullPath = $"/uploads/{uniqueFileName}",
                     PreviewPath = $"/uploads/{previewFileName}",
-                    PreviewData = previewData
+                    PreviewData = previewData,
+                };
+
+                profile.TotalMediaContents += 1;
+                profile.UpdatedAt = DateTime.UtcNow;
+
+                await _mediaContentRepository.AddAsync(media);
+                await _profileRepository.UpdateAsync(profile);
+                await _mediaContentRepository.CompleteAsync();
+
+                return new ResponseModel<object>
+                {
+                    Status = true,
+                    Message = StringResources.CreateSuccess
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ResponseModel<object>
+                {
+                    Status = false,
+                    Message = ex.Message
+                };
+            }
+        }
+
+        public async Task<ResponseModel<object>> UploadImage(MediaContentInDto request)
+        {
+            try
+            {
+                if (request.MediaFile == null || request.MediaFile.Length == 0)
+                {
+                    return new ResponseModel<object>
+                    {
+                        Status = false,
+                        Message = StringResources.NoFileFound
+                    };
+                }
+
+                var profile = await _profileRepository.GetAsync(request.ProfileId);
+
+                if (profile == null)
+                {
+                    return new ResponseModel<object>
+                    {
+                        Status = false,
+                        Message = StringResources.Forbidden
+                    };
+                }
+
+                using var ms = new MemoryStream();
+                await request.MediaFile.CopyToAsync(ms);
+                var imageBytes = ms.ToArray();
+
+                // Save to DB
+                var media = new MediaContent
+                {
+                    ProfileId = request.ProfileId,
+                    FileName = request.MediaFile.FileName,
+                    ContentType = StringResources.ImageContentType,
+                    FullData = imageBytes,
                 };
 
                 profile.TotalMediaContents += 1;
@@ -322,6 +422,43 @@ namespace HomeProject.Services.MediaContentService
                 }
 
                 content.IsFavourite = isFavourite;
+                content.UpdatedAt = DateTime.UtcNow;
+
+                await _mediaContentRepository.UpdateAsync(content);
+                await _mediaContentRepository.CompleteAsync();
+
+                return new ResponseModel<object>
+                {
+                    Status = true,
+                    Message = StringResources.UpdateSuccess
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ResponseModel<object>
+                {
+                    Status = false,
+                    Message = ex.Message
+                };
+            }
+        }
+
+        public async Task<ResponseModel<object>> UpdateContentRating(int id, int rating)
+        {
+            try
+            {
+                var content = await _mediaContentRepository.GetAsync(id);
+
+                if (content == null)
+                {
+                    return new ResponseModel<object>
+                    {
+                        Status = false,
+                        Message = StringResources.Forbidden
+                    };
+                }
+
+                content.Rating = rating;
                 content.UpdatedAt = DateTime.UtcNow;
 
                 await _mediaContentRepository.UpdateAsync(content);

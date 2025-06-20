@@ -16,5 +16,9 @@
         public const string Forbidden = "Forbidden access.";
         public const string ValidationError = "Validation error.";
         public const string Success = "Success.";
+        
+        public const string VideoContentType = "video";
+        public const string AudioContentType = "audio";
+        public const string ImageContentType = "image";
     }
 }
