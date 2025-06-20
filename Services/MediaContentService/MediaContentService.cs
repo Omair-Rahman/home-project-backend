@@ -24,44 +24,15 @@ namespace HomeProject.Services.MediaContentService
             _profileRepository = profileRepository;
         }
 
-        public async Task<ResponseModel<List<ContentPreviewListDto>>> GetContents()
+        public async Task<ResponseModel<List<ContentPreviewListDto>>> GetContents(MediaContentFilter request)
         {
             try
             {
-                var query = _mediaContentRepository.GetAllQueryable(x => x.IsActive, y => y.Profile!);
-                var mediaContents = await query.Select(x => new ContentPreviewListDto
-                {
-                    Id = x.Id,
-                    ProfileId = x.ProfileId,
-                    ProfileName = x.Profile!.Name,
-                    FileName = x.FileName,
-                    ContentType = /*x.ContentType*/"video/mp4",
-                    PreviewData = x.PreviewData,
-                    IsFavourite = x.IsFavourite
-                }).ToListAsync();
-
-                return new ResponseModel<List<ContentPreviewListDto>>
-                {
-                    Status = true,
-                    Message = StringResources.Success,
-                    Data = mediaContents
-                };
-            }
-            catch (Exception ex)
-            {
-                return new ResponseModel<List<ContentPreviewListDto>>
-                {
-                    Status = false,
-                    Message = ex.Message
-                };
-            }
-        }
-
-        public async Task<ResponseModel<List<ContentPreviewListDto>>> GetContentsByProfileId(int profileId)
-        {
-            try
-            {
-                var query = _mediaContentRepository.GetAllQueryable(x => x.ProfileId == profileId, y => y.Profile!);
+                var query = _mediaContentRepository
+                    .GetAllQueryable(x => x.IsActive
+                        && (request.ProfileId == null || x.ProfileId == request.ProfileId)
+                        && (request.IsFavourite == null || x.IsFavourite == request.IsFavourite)
+                        && (request.Rating == null || x.Rating >= request.Rating), y => y.Profile!);
                 var mediaContents = await query.Select(x => new ContentPreviewListDto
                 {
                     Id = x.Id,
@@ -130,7 +101,7 @@ namespace HomeProject.Services.MediaContentService
                     Message = ex.Message
                 };
             }
-        }        
+        }
 
         public async Task<ResponseModel<object>> UploadWithPreview(MediaContentInDto request)
         {

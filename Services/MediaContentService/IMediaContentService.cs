@@ -8,8 +8,7 @@ namespace HomeProject.Services.MediaContentService
     {
         Task<ResponseModel<object>> UploadWithPreview(MediaContentInDto request);
         Task<ResponseModel<object>> UploadWithPreviewV2(MediaContentInDto request);
-        Task<ResponseModel<List<ContentPreviewListDto>>> GetContents();
-        Task<ResponseModel<List<ContentPreviewListDto>>> GetContentsByProfileId(int profileId);
+        Task<ResponseModel<List<ContentPreviewListDto>>> GetContents(MediaContentFilter request);
         Task<ResponseModel<ContentDetailsDto>> GetFullContentsById(int id);
         Task<ResponseModel<object>> UpdateContentIsFavourite(int id, bool isFavourite);
     }

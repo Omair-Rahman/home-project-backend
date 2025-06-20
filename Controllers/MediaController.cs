@@ -29,21 +29,9 @@ namespace HomeProject.Controllers
         }
 
         [HttpGet("contents")]
-        public async Task<IActionResult> GetContents()
+        public async Task<IActionResult> GetContents([FromQuery] MediaContentFilter request)
         {
-            var response = await _mediaContentService.GetContents();
-
-            if (!response.Status)
-            {
-                return BadRequest(response);
-            }
-            return Ok(response);
-        }
-
-        [HttpGet("contents/{profileId}")]
-        public async Task<IActionResult> GetContentsByProfileId(int profileId)
-        {
-            var response = await _mediaContentService.GetContentsByProfileId(profileId);
+            var response = await _mediaContentService.GetContents(request);
 
             if (!response.Status)
             {
