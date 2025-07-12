@@ -111,7 +111,7 @@ namespace HomeProject.Services.MediaContentService
                     Id = x.Id,
                     ProfileId = x.ProfileId,
                     ProfileName = x.Profile!.Name,
-                    ContentType = "video/mp4",
+                    ContentType = "video/*",
                     FullData = x.FullData,
                     FullPath = x.FullPath,
                     IsFavourite = x.IsFavourite
@@ -210,6 +210,7 @@ namespace HomeProject.Services.MediaContentService
                 {
                     ProfileId = request.ProfileId,
                     FileName = request.MediaFile.FileName,
+                    FileExtension = Path.GetExtension(request.MediaFile.FileName),
                     ContentType = StringResources.VideoContentType,
                     PreviewData = previewData,
                     FullData = fullData
@@ -258,10 +259,10 @@ namespace HomeProject.Services.MediaContentService
                     };
                 }
 
-                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", profile.Name);
                 Directory.CreateDirectory(uploadsFolder); // Ensure the folder exists
 
-                var uniqueFileName = $"{Guid.NewGuid()}_{request.ProfileId}.mp4";
+                var uniqueFileName = $"{Guid.NewGuid()}_{request.ProfileId}{Path.GetExtension(request.MediaFile.FileName)}";
                 var fullPath = Path.Combine(uploadsFolder, uniqueFileName);
 
                 // Save original file to disk
@@ -317,6 +318,7 @@ namespace HomeProject.Services.MediaContentService
                 {
                     ProfileId = request.ProfileId,
                     FileName = request.MediaFile.FileName,
+                    FileExtension = Path.GetExtension(request.MediaFile.FileName),
                     ContentType = StringResources.VideoContentType,
                     FullPath = $"/uploads/{uniqueFileName}",
                     PreviewPath = $"/uploads/{previewFileName}",
@@ -379,6 +381,7 @@ namespace HomeProject.Services.MediaContentService
                 {
                     ProfileId = request.ProfileId,
                     FileName = request.MediaFile.FileName,
+                    FileExtension = Path.GetExtension(request.MediaFile.FileName),
                     ContentType = StringResources.ImageContentType,
                     FullData = imageBytes,
                 };

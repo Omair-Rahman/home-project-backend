@@ -8,6 +8,7 @@ namespace HomeProject.Models.Domain
         public int Rating { get; set; }
         public int ProfileId { get; set; }
         public required string FileName { get; set; }
+        public required string FileExtension { get; set; }
         public required string ContentType { get; set; }
         public string? PreviewPath { get; set; }
         public string? FullPath { get; set; }
